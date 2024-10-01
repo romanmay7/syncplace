@@ -13,6 +13,7 @@ type Storage interface {
 	UpdateUserAccount(*UserAccount) error
 	GetUserAccounts() ([]*UserAccount, error)
 	GetUserAccountByID(int) (*UserAccount, error)
+	GetUserAccountByUserName(string) (*UserAccount, error)
 }
 
 type PostgresStore struct {
@@ -45,7 +46,7 @@ func (s *PostgresStore) CreateUserAccountTable() error {
      id serial primary key,
 	 user_name varchar(50),
 	 email varchar(50),
-	 password varchar(50),
+	 password varchar(100),
 	 created_at timestamp
    )`
 
@@ -108,7 +109,20 @@ func (s *PostgresStore) GetUserAccountByID(id int) (*UserAccount, error) {
 		return scanRowsIntoUserAccount(rows)
 	}
 
-	return nil, fmt.Errorf("Acount %d not found", id)
+	return nil, fmt.Errorf("Account %d not found", id)
+}
+
+func (s *PostgresStore) GetUserAccountByUserName(username string) (*UserAccount, error) {
+	rows, err := s.db.Query("select * from user_account where user_name = $1", username)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		return scanRowsIntoUserAccount(rows)
+	}
+
+	return nil, fmt.Errorf("Account %s not found", username)
 }
 
 func (s *PostgresStore) GetUserAccounts() ([]*UserAccount, error) {

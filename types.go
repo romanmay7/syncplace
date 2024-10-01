@@ -2,7 +2,19 @@ package main
 
 import (
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
+
+type LoginRequest struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+type LoginResponse struct {
+	UserName string `json:"userName"`
+	Token    string `json:"token"`
+}
 
 type UserAccount struct {
 	ID        int       `json:"id"`
@@ -18,13 +30,21 @@ type CreateUserAccountRequest struct {
 	Email    string `json:"email"`
 }
 
-func NewUserAccount(username string, email string, password string) *UserAccount {
+func (a *UserAccount) ValidatePassword(psw string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(a.Password), []byte(psw)) == nil
+}
+
+func NewUserAccount(username string, email string, password string) (*UserAccount, error) {
+	encpw, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
 	return &UserAccount{
 		//ID:        rand.Intn(10000),
 		UserName:  username,
 		Email:     email,
-		Password:  password,
+		Password:  string(encpw), //Encrypted Password
 		CreatedAt: time.Now().UTC(),
-	}
+	}, nil
 
 }

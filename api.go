@@ -37,6 +37,7 @@ func makeHTTPHandleFunc(f apiFunc) http.HandlerFunc {
 }
 
 //API Server Definition ------------------------------------------------------------
+//==================================================================================
 
 type SyncPlaceAPIServer struct {
 	listenAddr string
@@ -53,6 +54,7 @@ func NewAPIServer(listenAddr string, store Storage) *SyncPlaceAPIServer {
 func (s *SyncPlaceAPIServer) Run() {
 	router := mux.NewRouter()
 
+	router.HandleFunc("/login", makeHTTPHandleFunc(s.handleLogin))
 	router.HandleFunc("/user", makeHTTPHandleFunc(s.handleUserAccount))
 	router.HandleFunc("/user/{id}", withJWTAuth(makeHTTPHandleFunc(s.handleGetUserAccountByID), s.store))
 
@@ -88,7 +90,7 @@ func (s *SyncPlaceAPIServer) handleGetUserAccounts(w http.ResponseWriter, r *htt
 	return WriteJSON(w, http.StatusOK, accounts)
 }
 
-// GET /user
+// GET /user/id
 func (s *SyncPlaceAPIServer) handleGetUserAccountByID(w http.ResponseWriter, r *http.Request) error {
 	id, err := getID(r)
 	if err != nil {
@@ -102,32 +104,47 @@ func (s *SyncPlaceAPIServer) handleGetUserAccountByID(w http.ResponseWriter, r *
 	return WriteJSON(w, http.StatusOK, account)
 }
 
+// POST /user
 func (s *SyncPlaceAPIServer) handleCreateUserAccount(w http.ResponseWriter, r *http.Request) error {
-	crateUserAccountReq := new(CreateUserAccountRequest)
-	if err := json.NewDecoder(r.Body).Decode(&crateUserAccountReq); err != nil {
+	newUserReq := new(CreateUserAccountRequest)
+	if err := json.NewDecoder(r.Body).Decode(&newUserReq); err != nil {
 		return err
 	}
 
-	userAccnt := NewUserAccount(crateUserAccountReq.UserName, crateUserAccountReq.Email, crateUserAccountReq.Password)
+	userAccnt, err := NewUserAccount(newUserReq.UserName, newUserReq.Email, newUserReq.Password)
+	if err != nil {
+		return err
+	}
+
 	//Store it in DB
 	if err := s.store.CreateUserAccount(userAccnt); err != nil {
 		return err
 	}
 
-	tokenString, err := createJWT(userAccnt)
+	/*tokenString, err := createJWT(userAccnt)
 	if err != nil {
 		return err
-	}
+	}*/
 
-	fmt.Println("JWT token: ", tokenString)
+	//fmt.Println("JWT token: ", tokenString)
 
 	return WriteJSON(w, http.StatusOK, userAccnt)
 }
 
+// DELETE /user/id
 func (s *SyncPlaceAPIServer) handleDeleteUserAccount(w http.ResponseWriter, r *http.Request) error {
-	return nil
+	id, err := getID(r)
+	if err != nil {
+		return err
+	}
+	if err := s.store.DeleteUserAccount(id); err != nil {
+		return err
+	}
+	return WriteJSON(w, http.StatusOK, map[string]int{"deleted": id})
 }
 
+// getID Helper function
+// ------------------------------------------------------------------------------------------------
 func getID(r *http.Request) (int, error) {
 	idString := mux.Vars(r)["id"]
 	id, err := strconv.Atoi(idString)
@@ -138,7 +155,44 @@ func getID(r *http.Request) (int, error) {
 	return id, nil
 }
 
+//--------------------------------------------------------------------------------------------------
+
+// POST /login
+func (s *SyncPlaceAPIServer) handleLogin(w http.ResponseWriter, r *http.Request) error {
+	if r.Method != "POST" {
+		return fmt.Errorf("method not allowed %s", r.Method)
+	}
+
+	var req LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		return err
+	}
+
+	acc, err := s.store.GetUserAccountByUserName(req.UserName)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("%+v\n", acc)
+
+	if !acc.ValidatePassword(req.Password) {
+		return fmt.Errorf("Authentication Error")
+	}
+
+	tokenString, err := createJWT(acc)
+	if err != nil {
+		return err
+	}
+
+	resp := LoginResponse{
+		UserName: req.UserName,
+		Token:    tokenString,
+	}
+
+	return WriteJSON(w, http.StatusOK, resp)
+}
+
 // ----------------AUTHENTICATION(JWT)--------------------------------------------------------
+//===================================================================================================
 
 // In general we should read our secret from our ENVIRONMENT
 // EXAMPLE : export JWT_SECRET = syncplace999
@@ -148,7 +202,7 @@ func createJWT(account *UserAccount) (string, error) {
 	//Create Claims
 	claims := &jwt.MapClaims{
 		"expiresAt": 15000,
-		"password":  account.Password,
+		"username":  account.UserName,
 	}
 
 	//secret := os.Getenv("JWT_SECRET")
@@ -196,7 +250,7 @@ func withJWTAuth(handlerFunc http.HandlerFunc, s Storage) http.HandlerFunc {
 			return
 		}
 		claims := token.Claims.(jwt.MapClaims)
-		if account.Password != claims["password"] {
+		if account.UserName != claims["username"] {
 			permissionDenied(w)
 			return
 		}
