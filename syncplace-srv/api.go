@@ -9,6 +9,8 @@ import (
 
 	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
+	"github.com/romanmay7/syncplace/wsocket"
+	"github.com/rs/cors"
 )
 
 // JSON writer
@@ -40,14 +42,16 @@ func makeHTTPHandleFunc(f apiFunc) http.HandlerFunc {
 //==================================================================================
 
 type SyncPlaceAPIServer struct {
-	listenAddr string
-	store      Storage
+	listenAddr   string
+	store        Storage
+	wsockHandler *wsocket.WsHandler
 }
 
-func NewAPIServer(listenAddr string, store Storage) *SyncPlaceAPIServer {
+func NewAPIServer(listenAddr string, store Storage, wsHandler *wsocket.WsHandler) *SyncPlaceAPIServer {
 	return &SyncPlaceAPIServer{
-		listenAddr: listenAddr,
-		store:      store,
+		listenAddr:   listenAddr,
+		store:        store,
+		wsockHandler: wsHandler,
 	}
 }
 
@@ -58,9 +62,21 @@ func (s *SyncPlaceAPIServer) Run() {
 	router.HandleFunc("/user", makeHTTPHandleFunc(s.handleUserAccount))
 	router.HandleFunc("/user/{id}", withJWTAuth(makeHTTPHandleFunc(s.handleGetUserAccountByID), s.store))
 
+	router.HandleFunc("/ws/createRoom", s.wsockHandler.CreateRoom)
+	router.HandleFunc("/ws/joinRoom/{roomId}", s.wsockHandler.JoinRoom)
+	router.HandleFunc("/ws/getRooms", s.wsockHandler.GetRooms)
+	router.HandleFunc("/ws/getClients/{roomId}", s.wsockHandler.GetClients)
+
 	log.Println("JSON API Server is running on port", s.listenAddr)
 
-	http.ListenAndServe(s.listenAddr, router)
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000"},
+		AllowCredentials: true,
+	})
+
+	handler := c.Handler(router)
+
+	http.ListenAndServe(s.listenAddr, handler)
 }
 
 //API Handlers ------------------------------------------------------------

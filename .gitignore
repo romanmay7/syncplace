@@ -24,3 +24,17 @@ go.work.sum
 
 # env file
 .env
+
+
+# Node.js specific
+node_modules/
+syncplace-ui/node_modules/
+
+
+# IDE/editor specific
+.idea/
+.vscode/
+
+# Build artifacts
+syncplace-srv/build/
+syncplace-srv/bin/
