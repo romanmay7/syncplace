@@ -1,6 +1,10 @@
 body {
   margin: 0;
   padding: 0;
+  max-height: 100hv;
+  max-width: 100vw;
+  overflow: hidden;
+
 }
 
 
@@ -37,4 +41,11 @@ body {
   border-radius:8px;
   border:none;
   background: #ece6d8;
+}
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing: border-box;
+
 }

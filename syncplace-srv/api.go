@@ -58,9 +58,9 @@ func NewAPIServer(listenAddr string, store Storage, wsHandler *wsocket.WsHandler
 func (s *SyncPlaceAPIServer) Run() {
 	router := mux.NewRouter()
 
-	router.HandleFunc("/login", makeHTTPHandleFunc(s.handleLogin))
-	router.HandleFunc("/user", makeHTTPHandleFunc(s.handleUserAccount))
-	router.HandleFunc("/user/{id}", withJWTAuth(makeHTTPHandleFunc(s.handleGetUserAccountByID), s.store))
+	router.HandleFunc("/api/login", makeHTTPHandleFunc(s.handleLogin))
+	router.HandleFunc("/api/user", makeHTTPHandleFunc(s.handleUserAccount))
+	router.HandleFunc("/api/user/{id}", withJWTAuth(makeHTTPHandleFunc(s.handleGetUserAccountByID), s.store))
 
 	router.HandleFunc("/ws/createRoom", s.wsockHandler.CreateRoom)
 	router.HandleFunc("/ws/joinRoom/{roomId}", s.wsockHandler.JoinRoom)
