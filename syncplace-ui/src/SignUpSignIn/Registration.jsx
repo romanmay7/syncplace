@@ -21,7 +21,7 @@ function Register() {
     console.log("Validating Request");
     if (handleValidation()) {
       console.log("Sending Request to: ",registerRoute);
-      const {password, confirmPassword, username, email} = values;
+      const {password, username, email} = values;
       const {data,status} = await axios.post(registerRoute, {
         username,
         email,
