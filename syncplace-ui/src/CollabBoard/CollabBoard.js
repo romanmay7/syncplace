@@ -1,4 +1,4 @@
-import React, {useRef, useLayoutEffect, useState} from "react";
+import React, {useRef, useLayoutEffect, useState, useContext} from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Toolbar from "./Toolbar";
 import rough from 'roughjs/bundled/rough.esm';
@@ -6,8 +6,11 @@ import { actions, toolTypes } from "../definitions";
 import { createBoardElement, updateBoardElement, drawBoardElement } from "../utils";
 import {v4 as uuid} from "uuid";
 import { updateBoardElementInStore } from "./collabBoardSlice";
+import { AuthContext } from '../Auth/AuthContext'; // Import AuthContext
 
 let selectedBoardElement;
+
+
 
 const setSelectedBoardElement = (el) => {
     selectedBoardElement = el;
@@ -15,6 +18,8 @@ const setSelectedBoardElement = (el) => {
 
 const CollabBoard = () => {
     const canvasRef = useRef();
+  
+    const { currentRoom } = useContext(AuthContext);
 
     //Getting objects from Store's State
     const toolType = useSelector(state =>state.collabBoard.tool);
@@ -96,7 +101,8 @@ const CollabBoard = () => {
                     y2: clientY, //NEW y
                     type: elements[index].type,
                 }, 
-                elements
+                elements,
+                currentRoom
               );
             }
         }

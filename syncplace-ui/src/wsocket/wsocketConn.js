@@ -1,6 +1,8 @@
 import { store } from "../store/store";
 import { setAllBoardElementsInStore ,updateBoardElementInStore } from "../CollabBoard/collabBoardSlice";
-import { v4 as uuidv4 } from 'uuid';
+
+
+//import { v4 as uuidv4 } from 'uuid';
 
 let wsocket;
 const WEBSOCKET_URL ="http://localhost:3100";
@@ -13,17 +15,18 @@ export const Kind = {
     DISCONNCTED:"4"
 };
 
+/*
 let id_ = uuidv4();
 
 const user = {
     id: id_,
     username: "user_" + id_,
-};
+};*/
 
-let roomId = "1";
-let roomName = "room_" + roomId ;
+//let roomId = "1";
+//let roomName = "room_" + roomId ;
 
-export const CreateNewRoom = async () => {
+export const CreateNewRoom = async (roomId,roomName) => {
 try{
 //First CREATE ROOM for websocket communication (for group of clients)
     const res = await fetch(`${WEBSOCKET_URL}/ws/createRoom`, {
@@ -50,15 +53,14 @@ return false
 }
 
 //CONNECT TO WEB SOCKET SERVER
-export const connectToWSocketServer = () => {
+export const connectToWSocketServer = (roomId,userName) => {
 
-     // CreateNewRoom().then(response => {
-     // if (response)
-     // {   
-
-        /*const*/ wsocket = new WebSocket(`${WEBSOCKET_URL}/ws/joinRoom/${roomId}?userId=${user.id}&username=${user.username}`);
+        /*const*/ wsocket = new WebSocket(`${WEBSOCKET_URL}/ws/joinRoom/${roomId}?username=${userName}`);
         if(wsocket.OPEN) {
             console.log("Connection to Web Socket has been established");
+            
+            //localStorage.setItem('current-room-id', roomId);
+            //joinRoom(roomId);
         }
 
         wsocket.onmessage = function(event) {
@@ -81,13 +83,11 @@ export const connectToWSocketServer = () => {
                  break;
             }
         }
-    //  }
 
-   // })
 };
 
 
-export const emitBoardElementUpdate = (elementData) => {
+export const emitBoardElementUpdate = (roomId,elementData) => {
     if(wsocket.OPEN)
     {
         console.log("Connection to Web Socket is OPEN");
@@ -98,7 +98,7 @@ export const emitBoardElementUpdate = (elementData) => {
     }
     wsocket.send(
         
-        JSON.stringify({kind: Kind.ELEMENT_UPDATE, element: elementData,content: "Update Element",roomId:"1"})
+        JSON.stringify({kind: Kind.ELEMENT_UPDATE, element: elementData,content: "Update Element",roomId})
     );
 };
 

@@ -75,15 +75,15 @@ func (h *WsHandler) JoinRoom(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
 	roomID := vars["roomId"]
-	clientID := r.URL.Query().Get("userId")
 	username := r.URL.Query().Get("username")
 
-	fmt.Println(roomID + " : " + clientID + " : " + username)
+	fmt.Println(roomID + " : " + username)
 
+	//Get Client's Info
 	cl := &Client{
 		Conn:     conn,
 		Message:  make(chan *Message, 10),
-		ID:       clientID,
+		ID:       username,
 		RoomID:   roomID,
 		Username: username,
 	}

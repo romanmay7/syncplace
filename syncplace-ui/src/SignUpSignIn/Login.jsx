@@ -1,4 +1,4 @@
-import React,{useState, useEffect} from "react";
+import React,{useState, useEffect, useContext} from "react";
 import {Link, useNavigate} from "react-router-dom";
 import styled from "styled-components";
 import Logo from "../assets/SPLogo.png";
@@ -6,6 +6,7 @@ import {ToastContainer,toast} from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { loginRoute } from "../utils/APIRoutes";
+import { AuthContext } from '../Auth/AuthContext'; // Import AuthContext
  
 function Login() {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ function Login() {
     username: "", 
     password: "",
   });
+  const { login } = useContext(AuthContext); // Access the login function
 
   const handleSubmit = async (event)=> {
     event.preventDefault();
@@ -26,11 +28,14 @@ function Login() {
       });
 
       if(status===200 || status===201 ) {
-          //localStorage.setItem('syncplace-app-user',JSON.stringify(data.userName));
-          localStorage.setItem('token', data.token);
+
           console.log("Login is Successfull: ",data.userName,);
           console.log("token: ",data.token,);
-          navigate("/collabboard");
+          //localStorage.setItem('token', data.token);
+          //localStorage.setItem('syncplace-app-user',data.userName);
+          login(data.userName, data.token); // Call the login function from AuthContext
+
+          navigate("/joinroom");
       }
       else {
         toast.error(data.msg, toastOptions);
@@ -87,7 +92,7 @@ function Login() {
               onChange={(e) => handleChange(e)}
             />
             <button type="submit">Login to your Account</button>
-            <span>
+            <span >
                 Don't have an Account yet ? <Link to = "/signup">Register</Link>
             </span>
           </form>

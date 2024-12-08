@@ -4,10 +4,11 @@ import { store } from "../store/store";
 import { setAllBoardElementsInStore } from "../CollabBoard/collabBoardSlice";
 import { emitBoardElementUpdate } from "../wsocket/wsocketConn";
 
-export const updateBoardElement = ({id, x1, x2, y1, y2, type, index }, elements) => {
+
+export const updateBoardElement = ({id, x1, x2, y1, y2, type, index }, elements, currentRoom) => {
     //create copy f elements array
     const elementsCopy = [...elements]
-    
+
     switch(type) {
         case toolTypes.RECTANGLE:
             const updatedElement = createBoardElement({
@@ -26,7 +27,9 @@ export const updateBoardElement = ({id, x1, x2, y1, y2, type, index }, elements)
         store.dispatch(setAllBoardElementsInStore(elementsCopy));
         
         //Update all the Clients ,connected to the same Web Socket
-         emitBoardElementUpdate(updatedElement);
+        //const roomId = localStorage.getItem('current-room-id');  //Get roomID from localStore
+
+        emitBoardElementUpdate(currentRoom,updatedElement);
 
         break;
         default:
