@@ -45,13 +45,15 @@ type SyncPlaceAPIServer struct {
 	listenAddr   string
 	store        Storage
 	wsockHandler *wsocket.WsHandler
+	wsockHub     *wsocket.Hub
 }
 
-func NewAPIServer(listenAddr string, store Storage, wsHandler *wsocket.WsHandler) *SyncPlaceAPIServer {
+func NewAPIServer(listenAddr string, store Storage, wsHandler *wsocket.WsHandler, wsHub *wsocket.Hub) *SyncPlaceAPIServer {
 	return &SyncPlaceAPIServer{
 		listenAddr:   listenAddr,
 		store:        store,
 		wsockHandler: wsHandler,
+		wsockHub:     wsHub,
 	}
 }
 
@@ -62,8 +64,10 @@ func (s *SyncPlaceAPIServer) Run() {
 	router.HandleFunc("/api/user", makeHTTPHandleFunc(s.handleUserAccount))
 	router.HandleFunc("/api/user/{id}", withJWTAuth(makeHTTPHandleFunc(s.handleGetUserAccountByID), s.store))
 
+	router.HandleFunc("/api/saveBoard/{roomId}", checkIfBoardRecordExistAndSave(makeHTTPHandleFunc(s.handleSaveBoardState), s.store, s.wsockHub))
+
 	router.HandleFunc("/ws/createRoom", s.wsockHandler.CreateRoom)
-	router.HandleFunc("/ws/joinRoom/{roomId}", s.wsockHandler.JoinRoom)
+	router.HandleFunc("/ws/joinRoom/{roomId}", checkBoardData(s.wsockHandler.JoinRoom, s.store, s.wsockHub))
 	router.HandleFunc("/ws/getRooms", s.wsockHandler.GetRooms)
 	router.HandleFunc("/ws/getClients/{roomId}", s.wsockHandler.GetClients)
 
@@ -293,4 +297,85 @@ func validateJWT(tokenString string) (*jwt.Token, error) {
 		return []byte(secret), nil
 	})
 
+}
+
+// ----------------------------------------------------------------------------------------
+func checkBoardData(handlerFunc http.HandlerFunc, s Storage, hub *wsocket.Hub) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Calling checkBoardData MiddleWare")
+
+		vars := mux.Vars(r)
+		roomID := vars["roomId"]
+
+		//If there is still no Clients already connected to the Room
+		if len(hub.Rooms[roomID].Clients) == 0 {
+
+			exist, err := s.CheckIfBoardRecordExist(roomID)
+
+			if err != nil {
+				fmt.Print(err)
+			}
+
+			if exist {
+
+				var elements []interface{}
+				//get elements data(Board State) from DB
+				elements, err := s.GetBoardState(roomID)
+
+				if err != nil {
+					WriteJSON(w, http.StatusForbidden, ApiError{Error: "Invalid Board State"})
+					return
+				}
+
+				//check if there is some data we got from DB
+				if len(elements) > 0 {
+
+					hub.Rooms[roomID].Elements = elements
+				}
+			}
+		}
+
+		handlerFunc(w, r)
+	}
+}
+
+// ----------------------------------------------------------------------------------------
+
+// GET /saveBoard
+func (s *SyncPlaceAPIServer) handleSaveBoardState(w http.ResponseWriter, r *http.Request) error {
+	if r.Method != "GET" {
+		return fmt.Errorf("method not allowed %s", r.Method)
+	}
+
+	return WriteJSON(w, http.StatusOK, "Board State Saved")
+}
+
+// -  -  - -  -  -  -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  -
+func checkIfBoardRecordExistAndSave(handlerFunc http.HandlerFunc, s Storage, hub *wsocket.Hub) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Calling checkIfBoardRecordExist MiddleWare")
+
+		vars := mux.Vars(r)
+		roomID := vars["roomId"]
+
+		var exist bool
+		//get elements data(Board State) from DB
+		exist, err := s.CheckIfBoardRecordExist(roomID)
+
+		if err != nil {
+			WriteJSON(w, http.StatusForbidden, ApiError{Error: "DB Query Error"})
+			fmt.Print(err)
+			return
+		}
+
+		if exist {
+
+			s.UpdateBoardStateRecord(roomID, hub.Rooms[roomID].Elements)
+
+		} else {
+			s.CreateBoardStateRecord(roomID, hub.Rooms[roomID].Name, hub.Rooms[roomID].Elements)
+		}
+
+		handlerFunc(w, r)
+	}
 }

@@ -21,7 +21,7 @@ func main() {
 	go hub.Run()
 
 	//SERVER
-	server := NewAPIServer(":3100", store, wsHandler)
+	server := NewAPIServer(":3100", store, wsHandler, hub)
 	server.Run()
 	fmt.Println("Yeah!")
 }

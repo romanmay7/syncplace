@@ -66,6 +66,7 @@ var upgrader = websocket.Upgrader{
 }
 
 // ----------------------------------------------------------------------------
+
 func (h *WsHandler) JoinRoom(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -87,6 +88,10 @@ func (h *WsHandler) JoinRoom(w http.ResponseWriter, r *http.Request) {
 		RoomID:   roomID,
 		Username: username,
 	}
+
+	//if len(h.hub.Rooms[roomID].Clients) == 0:
+	//get elements data(board state) from DB
+	//   var elements:= callback(roomID)
 
 	//Create MESSAGES
 	m := &Message{
