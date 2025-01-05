@@ -41,7 +41,8 @@ const SaveButton =  ({src}) => {
        })
 
       if(res.ok) {
-       console.log("The Room Board state was Saved");  
+       console.log("The Room Board state was Saved");
+       alert("The Room Board state was Saved");  
        return true
        }
      }

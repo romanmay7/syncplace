@@ -1,12 +1,14 @@
 import React, {useRef, useLayoutEffect, useState, useContext} from "react";
 import { useSelector, useDispatch } from "react-redux";
 import Toolbar from "./Toolbar";
+import FeaturesPanel from "./FeaturesPanel";
 import rough from 'roughjs/bundled/rough.esm';
 import { actions, toolTypes } from "../definitions";
 import { createBoardElement, updateBoardElement, drawBoardElement } from "../utils";
 import {v4 as uuid} from "uuid";
 import { updateBoardElementInStore } from "./collabBoardSlice";
 import { AuthContext } from '../Auth/AuthContext'; // Import AuthContext
+import { ChatComponent } from '../ChatComponent/ChatComponent';
 
 let selectedBoardElement;
 
@@ -26,6 +28,7 @@ const CollabBoard = () => {
     const elements = useSelector(state =>state.collabBoard.elements);
 
     const [action, setAction] = useState(null);
+    const[openedChatWindow, setOpenedChatWindow] = useState(false);
     const dispatch = useDispatch(); 
     //---------------------------------------------------------------------------------
     //The RENDERING Part of Collaboration Board Canvas goes here
@@ -112,6 +115,10 @@ const CollabBoard = () => {
     return (
      <>
        <Toolbar />
+       <FeaturesPanel
+         setOpenedChatWindow = {setOpenedChatWindow}
+       />
+       {openedChatWindow && <ChatComponent setOpenedChatWindow = {setOpenedChatWindow}/>}
        <canvas
        onMouseDown={handleMouseDown}
        onMouseUp={handleMouseUp}

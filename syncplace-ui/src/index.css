@@ -11,11 +11,11 @@ body {
 .toolbar_container {
   position: absolute;
   top:0;
-  width: 350px;
+  width: 550px;
   left: calc(50% - 175px);
   border-bottom-left-radius: 15px;
   border-bottom-right-radius: 15px;
-  background: #abb0c0;
+  background: #93a0c8;
   height: 60px;
   display:flex;
   justify-content: space-around;
@@ -41,6 +41,20 @@ body {
   border-radius:8px;
   border:none;
   background: #ece6d8;
+}
+
+.features_panel {
+  position: left;
+  top:0;
+  width: 350px;
+  left: calc(50% - 175px);
+  border-bottom-left-radius: 15px;
+  border-bottom-right-radius: 15px;
+  background: #6682df;
+  height: 60px;
+  display:flex;
+  justify-content: space-around;
+  align-items: left;
 }
 
 *{
