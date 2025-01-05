@@ -1,1 +1,5 @@
 *.go linguist-language=Go
+*.js linguist-generated=true
+*.jsx linguist-generated=true 
+*.ts linguist-generated=true
+*.tsx linguist-generated=true
