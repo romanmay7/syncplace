@@ -1,1 +1,1 @@
-*.js linguist-vendored=false
+*.go linguist-language=Go
