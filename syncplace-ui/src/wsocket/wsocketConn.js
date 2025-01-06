@@ -1,5 +1,5 @@
 import { store } from "../store/store";
-import { setAllBoardElementsInStore ,updateBoardElementInStore } from "../CollabBoard/collabBoardSlice";
+import { setAllBoardElementsInStore ,updateBoardElementInStore, setChatMessageInStore, setAllChatMessagesInStore } from "../CollabBoard/collabBoardSlice";
 
 
 //import { v4 as uuidv4 } from 'uuid';
@@ -12,7 +12,8 @@ export const Kind = {
     BOARD_STATE_UPDATE :"1",
     ELEMENT_UPDATE :"2",
     CONNECTED:"3",
-    DISCONNCTED:"4"
+    DISCONNCTED:"4",
+    CHAT_MESSAGE:"5",
 };
 
 /*
@@ -28,7 +29,8 @@ const user = {
 
 export const CreateNewRoom = async (roomId,roomName) => {
 try{
-//First CREATE ROOM for websocket communication (for group of clients)
+    console.log("CreateNewRoom| roomId:"+roomId);
+   //First CREATE ROOM for websocket communication (for group of clients)
     const res = await fetch(`${WEBSOCKET_URL}/ws/createRoom`, {
         method: "POST",
         headers: { "Content-Type": "application/json",},
@@ -77,8 +79,21 @@ export const connectToWSocketServer = (roomId,userName) => {
                  break;
                case(Kind.BOARD_STATE_UPDATE):
                  {
-                    //console.log("BOARD_STATE_UPDATE");
-                    store.dispatch(setAllBoardElementsInStore(parsedData.elements))
+                    console.log("BOARD_STATE_UPDATE");
+                    if(parsedData.elements !== 'undefined' && parsedData.elements !== null)
+                    {
+                        store.dispatch(setAllBoardElementsInStore(parsedData.elements));
+                    }
+                    if(parsedData.chatMessages !== 'undefined' && parsedData.chatMessages !== null) 
+                    {
+                        store.dispatch(setAllChatMessagesInStore(parsedData.chatMessages));
+                    }
+                 }
+                 break;
+                case(Kind.CHAT_MESSAGE):
+                 {
+                    //console.log("CHAT_MESSAGE");
+                    store.dispatch(setChatMessageInStore(parsedData.chatMessage))
                  }
                  break;
             }
@@ -99,6 +114,22 @@ export const emitBoardElementUpdate = (roomId,elementData) => {
     wsocket.send(
         
         JSON.stringify({kind: Kind.ELEMENT_UPDATE, element: elementData,content: "Update Element",roomId})
+    );
+};
+
+export const emitNewChatMessage = (roomId,message) => {
+    if(wsocket.OPEN)
+    {
+        console.log("Connection to Web Socket is OPEN");
+    }
+    else
+    {
+        console.log("Connection to Web Socket is CLOSED");
+    }
+    console.log(message);
+    wsocket.send(
+        
+        JSON.stringify({kind: Kind.CHAT_MESSAGE, chatMessage: message, content: "New Chat Message",roomId})
     );
 };
 

@@ -33,10 +33,8 @@ type CreateRoomRequest struct {
 }
 
 func (h *WsHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
+
 	var req CreateRoomRequest
-
-	fmt.Println("Create Room Request")
-
 	// Decode the JSON request body
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -44,16 +42,30 @@ func (h *WsHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// request handling logic
-	h.hub.Rooms[req.ID] = &Room{
-		ID:      req.ID,
-		Name:    req.Name,
-		Clients: make(map[string]*Client),
+	fmt.Println("Create Room Request")
+	// Check if Room already has been created
+	_, exists := h.hub.Rooms[req.ID]
+	if exists {
+		fmt.Println("Room already has been created")
+		// Send a response
+		w.WriteHeader(http.StatusCreated) // Or another appropriate status code
+		json.NewEncoder(w).Encode(map[string]interface{}{"message": "Room already has been created"})
+
+	} else {
+		fmt.Println("Creating New Room . . .")
+
+		// request handling logic
+		h.hub.Rooms[req.ID] = &Room{
+			ID:      req.ID,
+			Name:    req.Name,
+			Clients: make(map[string]*Client),
+		}
+
+		// Send a response
+		w.WriteHeader(http.StatusCreated) // Or another appropriate status code
+		json.NewEncoder(w).Encode(map[string]interface{}{"message": "Room created successfully"})
 	}
 
-	// Send a response
-	w.WriteHeader(http.StatusCreated) // Or another appropriate status code
-	json.NewEncoder(w).Encode(map[string]interface{}{"message": "Room created successfully"})
 }
 
 // ----------------------------------------------------------------------------
@@ -102,11 +114,12 @@ func (h *WsHandler) JoinRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	m2 := &Message{
-		Kind:     KindBoardStateUpdate,
-		Content:  "Update The Board State",
-		Elements: h.hub.Rooms[roomID].Elements,
-		RoomID:   roomID,
-		Username: username,
+		Kind:         KindBoardStateUpdate,
+		Content:      "Update The Board State",
+		Elements:     h.hub.Rooms[roomID].Elements,
+		ChatMessages: h.hub.Rooms[roomID].ChatMessages,
+		RoomID:       roomID,
+		Username:     username,
 	}
 
 	//fmt.Println("Elements in Storage")
@@ -119,10 +132,16 @@ func (h *WsHandler) JoinRoom(w http.ResponseWriter, r *http.Request) {
 
 	h.hub.Broadcast <- m
 
-	if len(h.hub.Rooms[roomID].Elements) > 0 {
-		//Send message to newly joined client to make him update his Elements Board State
-		cl.Message <- m2
-		//h.hub.PrivateMsg <- m2
+	if len(h.hub.Rooms[roomID].Elements) > 0 || len(h.hub.Rooms[roomID].ChatMessages) > 0 {
+		if len(h.hub.Rooms[roomID].Clients) > 1 {
+			fmt.Println(" Multiple Connected Clients | Recieving Room Data")
+			//Send message to newly joined client to make him update his Elements Board State and get Room's Chat Messages
+			cl.Message <- m2
+			//Else in case this is the first Client who joined we'll make him update  his Elements Board State and get Room's Chat Messages
+		} else {
+			fmt.Println("First Client Joined | Recieving Room Data")
+			h.hub.PrivateMsg <- m2
+		}
 
 	}
 

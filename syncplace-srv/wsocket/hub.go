@@ -10,12 +10,20 @@ type BoardElement struct {
 	Y2           int         `json:"y2"`
 }
 
+type ChatMessage struct {
+	MsgID     string `json:"msgId"`
+	RoomID    string `json:"roomId"`
+	Timestamp string `json:"timestamp"`
+	Content   string `json:"content"`
+	Sender    string `json:"sender"`
+}
+
 type Room struct {
-	ID       string             `json:"id"`
-	Name     string             `json:"name"`
-	Clients  map[string]*Client `json:"clients"`
-	Elements []interface{}      `json:"elements"`
-	//Elements map[string]interface{} `json:"elements"`
+	ID           string             `json:"id"`
+	Name         string             `json:"name"`
+	Clients      map[string]*Client `json:"clients"`
+	Elements     []interface{}      `json:"elements"`
+	ChatMessages []ChatMessage      `json:"chatMessages"`
 }
 
 type Hub struct {

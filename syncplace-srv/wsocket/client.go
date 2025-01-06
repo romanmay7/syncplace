@@ -18,12 +18,14 @@ type Client struct {
 }
 
 type Message struct {
-	Kind     string        `json:"kind"`
-	Content  string        `json:"content"`
-	Elements []interface{} `json:"elements"`
-	Element  interface{}   `json:"element"`
-	RoomID   string        `json:"roomId"`
-	Username string        `json:"username"`
+	Kind         string        `json:"kind"`
+	Content      string        `json:"content"`
+	Elements     []interface{} `json:"elements"`
+	Element      interface{}   `json:"element"`
+	RoomID       string        `json:"roomId"`
+	Username     string        `json:"username"`
+	ChatMessage  ChatMessage   `json:"chatMessage"`
+	ChatMessages []ChatMessage `json:"chatMessages"`
 }
 
 /*
@@ -39,6 +41,7 @@ const (
 	KindElementUpdate    = "2"
 	KindNewUserConnected = "3"
 	KindUserDisconnected = "4"
+	KindChatMessage      = "5"
 )
 
 // WRITE TO CLIENT's WEBSOCKET **********************************************************************
@@ -94,6 +97,8 @@ func (c *Client) readMessage(hub *Hub) {
 		deserialize_err := json.Unmarshal(m, &data)
 		if deserialize_err != nil {
 			fmt.Println("Problem with Deserialization")
+			fmt.Println(deserialize_err)
+			fmt.Println(data)
 			return
 		}
 
@@ -103,11 +108,13 @@ func (c *Client) readMessage(hub *Hub) {
 		message := data.Content
 		roomId := data.RoomID
 		elementData := data.Element
+		chatMessage := data.ChatMessage
 
 		fmt.Println("kind:" + string(kind))
 		fmt.Println("content:" + message)
 		fmt.Println("roomId:" + roomId)
 		fmt.Println(elementData)
+		fmt.Println(chatMessage)
 		//Handle Different Types of Messages accordingly ---------------------------------------
 
 		if kind == KindBoardStateUpdate {
@@ -146,6 +153,21 @@ func (c *Client) readMessage(hub *Hub) {
 				Username: c.Username,
 			}
 			//BROADCAST updated Element data to all other clients in same Room
+			hub.Broadcast <- msg
+
+		} else if kind == KindChatMessage {
+
+			hub.Rooms[roomId].ChatMessages = append(hub.Rooms[roomId].ChatMessages, chatMessage)
+			fmt.Println("Chat Message added to the Room")
+
+			msg := &Message{
+				Kind:        KindChatMessage,
+				Content:     message,
+				ChatMessage: chatMessage,
+				RoomID:      c.RoomID,
+				Username:    c.Username,
+			}
+			//BROADCAST  Chat Message  to all other clients in same Room
 			hub.Broadcast <- msg
 
 		}

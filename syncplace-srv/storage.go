@@ -4,8 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"time"
 
 	_ "github.com/lib/pq"
+	"github.com/romanmay7/syncplace/wsocket"
+	//"github.com/google/uuid"
 )
 
 type Storage interface {
@@ -19,6 +22,8 @@ type Storage interface {
 	CreateBoardStateRecord(string, string, []interface{}) error
 	UpdateBoardStateRecord(string, []interface{}) error
 	CheckIfBoardRecordExist(string) (bool, error)
+	GetRoomChatMessages(roomId string) ([]wsocket.ChatMessage, error)
+	AddNewChatMessage(roomId string, msgID string, timestamp string, content string, sender string) error
 }
 
 type PostgresStore struct {
@@ -47,6 +52,9 @@ func (s *PostgresStore) Init() error {
 }
 
 func (s *PostgresStore) CreateAppTables() error {
+
+	fmt.Println("calling : CreateAppTables()")
+
 	query := `create table if not exists user_account(
      id serial primary key,
 	 user_name varchar(50),
@@ -69,6 +77,22 @@ func (s *PostgresStore) CreateAppTables() error {
 	);
 `
 	_, err = s.db.Exec(query2)
+
+	if err != nil {
+		return err
+	}
+
+	query3 := `CREATE TABLE IF NOT EXISTS chat_message (
+		id SERIAL PRIMARY KEY,
+		msg_id  UUID NOT NULL UNIQUE,
+		room_id UUID NOT NULL,
+        time_stamp timestamp,
+		content TEXT,
+		sender varchar(50)
+    );`
+
+	_, err = s.db.Exec(query3)
+	fmt.Println(err)
 
 	return err
 }
@@ -98,6 +122,8 @@ func (s *PostgresStore) CreateUserAccount(acc *UserAccount) error {
 
 func (s *PostgresStore) GetBoardState(roomId string) ([]interface{}, error) {
 
+	fmt.Println("calling: GetBoardState for Room: " + roomId)
+
 	var elements []interface{}
 
 	rows, err := s.db.Query("select data from board_state where room_id = $1", roomId)
@@ -106,15 +132,14 @@ func (s *PostgresStore) GetBoardState(roomId string) ([]interface{}, error) {
 	}
 
 	for rows.Next() {
-
+		fmt.Println("Deserializing data")
 		var jsonData []byte
 		err := rows.Scan(&jsonData)
 		if err != nil {
 			return nil, err
 		}
 
-		// Deserializing elements data into generic slice (if no specific structure)
-		var elements []interface{}
+		// Deserializing elements data into generic slice (no specific structure)
 		err = json.Unmarshal(jsonData, &elements)
 
 		if err != nil {
@@ -122,7 +147,6 @@ func (s *PostgresStore) GetBoardState(roomId string) ([]interface{}, error) {
 		}
 
 	}
-
 	//return nil, fmt.Errorf("Room State %d not found", id)
 
 	return elements, err
@@ -193,6 +217,75 @@ func (s *PostgresStore) UpdateBoardStateRecord(roomId string, elements []interfa
 	return nil
 }
 
+// ------------------------------------------------------------------------------------------------------------------
+
+func (s *PostgresStore) GetRoomChatMessages(roomId string) ([]wsocket.ChatMessage, error) {
+	fmt.Println("calling: GetRoomChatMessages")
+	var chatMessages []wsocket.ChatMessage
+
+	rows, err := s.db.Query("select msg_id, room_id, time_stamp, content, sender from chat_message where room_id = $1", roomId)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close() // Close the rows after iterating
+
+	for rows.Next() {
+		var msgId string
+		var roomId string
+		var timestamp time.Time
+		var content string
+		var sender string
+
+		err := rows.Scan(&msgId, &roomId, &timestamp, &content, &sender)
+		if err != nil {
+			return nil, err
+		}
+
+		// Create the chat message object with the scanned values
+		chatMessage := wsocket.ChatMessage{
+			MsgID:     msgId,
+			RoomID:    roomId,
+			Timestamp: timestamp.String(),
+			Content:   content,
+			Sender:    sender,
+		}
+
+		chatMessages = append(chatMessages, chatMessage)
+
+	}
+
+	return chatMessages, err
+}
+
+func (s *PostgresStore) AddNewChatMessage(roomId string, msgID string, timestamp string, content string, sender string) error {
+
+	query := `insert into chat_message
+	        (msg_id, room_id, time_stamp, content, sender)
+			 values ($1, $2, $3, $4, $5)
+			 ON CONFLICT (msg_id) DO NOTHING`
+
+	//msgID := uuid.New()
+	res, err := s.db.Query(
+		query,
+		msgID,
+		roomId,
+		timestamp,
+		content,
+		sender)
+
+	if err != nil {
+		fmt.Print(err)
+		return err
+	}
+
+	fmt.Printf("%+v\n", res)
+
+	return nil
+
+}
+
+// ------------------------------------------------------------------------------------------------------------------
 func (s *PostgresStore) UpdateUserAccount(*UserAccount) error {
 	return nil
 }

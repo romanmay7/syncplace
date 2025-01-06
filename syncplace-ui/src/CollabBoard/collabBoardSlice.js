@@ -3,7 +3,8 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   tool:null,
-  elements: []
+  elements: [],
+  chatMessages: [],
 };
 
 
@@ -30,10 +31,24 @@ export const collabBoardSlice = createSlice({
       setAllBoardElementsInStore: (state, action) => {
         state.elements = action.payload;
         console.log(state.elements);
+      },//Set all  chat messages in the store
+      setAllChatMessagesInStore: (state, action) => {
+        var msgList = action.payload
+        //sort chat messages by date
+        msgList.sort(function(x, y){
+          return x.timestamp - y.timestamp;
+        })
+        state.chatMessages = msgList;
+        console.log(state.chatMessages);
+      },
+      //Add new Chat Message
+      setChatMessageInStore: (state, action) => {
+        state.chatMessages.push(action.payload);
+        console.log(state.chatMessages);
       },
     },
   });
   
-export const  { setToolType, updateBoardElementInStore, setAllBoardElementsInStore } = collabBoardSlice.actions;
+export const  { setToolType, updateBoardElementInStore, setAllBoardElementsInStore, setChatMessageInStore, setAllChatMessagesInStore } = collabBoardSlice.actions;
   
- // export default collabBoardSlice;
+ // export default collabBoardSlice;  

@@ -6,23 +6,41 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './index.css'; // Import your CSS file
 import Logo from "../assets/SPLogo.png";
 import { AuthContext } from '../Auth/AuthContext'; // Import AuthContext
+import {CreateNewRoom} from "../wsocket/wsocketConn";
 
 
 
 const JoinRoom = ({ uuid }) => {
   const [roomId, setRoomId] = useState("");
-  const { joinRoom, userName } = useContext(AuthContext); 
+  const { joinRoom , userName } = useContext(AuthContext); 
 
   const navigate = useNavigate();
 
   const handleJoinRoom = (e) => {
     e.preventDefault();
-
+    
+    CreateNewRoom(roomId,"").then(response => {
+          if (response)
+            {
+    
+                // Get UserName from Local Store
+                //const userName = localStorage.getItem('syncplace-app-user');
+                console.log("Room ID:"+roomId);
+    
+                connectToWSocketServer(roomId,userName);
+                joinRoom(roomId);
+            
+                navigate("/collabboard");
+            }
+            else
+            {
+              console.log("There was a Problem to Create a channel for the  Room");
+    
+            }
+          });
     // Get UserName from Local Store
     //const userName = localStorage.getItem('syncplace-app-user');
-        
-    connectToWSocketServer(roomId,userName);
-    joinRoom(roomId);
+  
 
     navigate("/collabboard");
   };

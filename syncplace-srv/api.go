@@ -307,6 +307,7 @@ func checkBoardData(handlerFunc http.HandlerFunc, s Storage, hub *wsocket.Hub) h
 		vars := mux.Vars(r)
 		roomID := vars["roomId"]
 
+		fmt.Println("Checking data for Room: " + roomID)
 		//If there is still no Clients already connected to the Room
 		if len(hub.Rooms[roomID].Clients) == 0 {
 
@@ -317,21 +318,38 @@ func checkBoardData(handlerFunc http.HandlerFunc, s Storage, hub *wsocket.Hub) h
 			}
 
 			if exist {
-
-				var elements []interface{}
-				//get elements data(Board State) from DB
+				fmt.Println("There is already some data for Room: " + roomID)
+				//Get elements data(Board State) from DB
+				//var elements []interface{}
 				elements, err := s.GetBoardState(roomID)
 
 				if err != nil {
 					WriteJSON(w, http.StatusForbidden, ApiError{Error: "Invalid Board State"})
+					fmt.Println(err)
 					return
 				}
 
 				//check if there is some data we got from DB
 				if len(elements) > 0 {
-
+					fmt.Println("Retrived data for the Room: " + roomID)
 					hub.Rooms[roomID].Elements = elements
 				}
+
+			}
+
+			//Get Chat Messages data  from DB
+			fmt.Println("Check for CHAT Messages")
+			chatMessages, err := s.GetRoomChatMessages(roomID)
+			//fmt.Println(chatMessages)
+
+			if err != nil {
+				WriteJSON(w, http.StatusForbidden, ApiError{Error: "Invalid Chat Messages Data"})
+				fmt.Println(err)
+				return
+			}
+
+			if len(chatMessages) > 0 {
+				hub.Rooms[roomID].ChatMessages = chatMessages
 			}
 		}
 
@@ -353,7 +371,7 @@ func (s *SyncPlaceAPIServer) handleSaveBoardState(w http.ResponseWriter, r *http
 // -  -  - -  -  -  -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  -
 func checkIfBoardRecordExistAndSave(handlerFunc http.HandlerFunc, s Storage, hub *wsocket.Hub) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Calling checkIfBoardRecordExist MiddleWare")
+		fmt.Println("Calling checkIfBoardRecordExistAndSave MiddleWare")
 
 		vars := mux.Vars(r)
 		roomID := vars["roomId"]
@@ -374,6 +392,20 @@ func checkIfBoardRecordExistAndSave(handlerFunc http.HandlerFunc, s Storage, hub
 
 		} else {
 			s.CreateBoardStateRecord(roomID, hub.Rooms[roomID].Name, hub.Rooms[roomID].Elements)
+		}
+
+		// Save Chat Messages Data
+		// (Insert every new chat message)
+		if len(hub.Rooms[roomID].ChatMessages) != 0 {
+			for _, msg := range hub.Rooms[roomID].ChatMessages {
+
+				err := s.AddNewChatMessage(msg.RoomID, msg.MsgID, msg.Timestamp, msg.Content, msg.Sender)
+				if err != nil {
+					WriteJSON(w, http.StatusForbidden, ApiError{Error: "DB Error: Storing New Chat Message "})
+					fmt.Print(err)
+					return
+				}
+			}
 		}
 
 		handlerFunc(w, r)
