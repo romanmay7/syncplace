@@ -64,6 +64,10 @@ func NewAPIServer(listenAddr string, store Storage, filemanager filemanager.File
 func (s *SyncPlaceAPIServer) Run() {
 	router := mux.NewRouter()
 
+	//FileServer for Serving files uploaded by users to Local Server Storage in "./uploads" folder
+	fs := http.FileServer(http.Dir("./uploads/"))
+	router.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", fs))
+
 	router.HandleFunc("/api/upload", s.filemgr.UploadFile)
 	router.HandleFunc("/api/login", makeHTTPHandleFunc(s.handleLogin))
 	router.HandleFunc("/api/user", makeHTTPHandleFunc(s.handleUserAccount))
