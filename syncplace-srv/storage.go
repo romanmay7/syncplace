@@ -23,7 +23,7 @@ type Storage interface {
 	UpdateBoardStateRecord(string, []interface{}) error
 	CheckIfBoardRecordExist(string) (bool, error)
 	GetRoomChatMessages(roomId string) ([]wsocket.ChatMessage, error)
-	AddNewChatMessage(roomId string, msgID string, timestamp string, content string, sender string) error
+	AddNewChatMessage(roomId string, msgID string, timestamp string, content string, sender string, file_path string) error
 }
 
 type PostgresStore struct {
@@ -88,7 +88,8 @@ func (s *PostgresStore) CreateAppTables() error {
 		room_id UUID NOT NULL,
         time_stamp timestamp,
 		content TEXT,
-		sender varchar(50)
+		sender varchar(50),
+		file_path TEXT
     );`
 
 	_, err = s.db.Exec(query3)
@@ -223,7 +224,7 @@ func (s *PostgresStore) GetRoomChatMessages(roomId string) ([]wsocket.ChatMessag
 	fmt.Println("calling: GetRoomChatMessages")
 	var chatMessages []wsocket.ChatMessage
 
-	rows, err := s.db.Query("select msg_id, room_id, time_stamp, content, sender from chat_message where room_id = $1", roomId)
+	rows, err := s.db.Query("select msg_id, room_id, time_stamp, content, sender, file_path from chat_message where room_id = $1", roomId)
 	if err != nil {
 		return nil, err
 	}
@@ -236,8 +237,9 @@ func (s *PostgresStore) GetRoomChatMessages(roomId string) ([]wsocket.ChatMessag
 		var timestamp time.Time
 		var content string
 		var sender string
+		var file_path string
 
-		err := rows.Scan(&msgId, &roomId, &timestamp, &content, &sender)
+		err := rows.Scan(&msgId, &roomId, &timestamp, &content, &sender, &file_path)
 		if err != nil {
 			return nil, err
 		}
@@ -249,6 +251,7 @@ func (s *PostgresStore) GetRoomChatMessages(roomId string) ([]wsocket.ChatMessag
 			Timestamp: timestamp.String(),
 			Content:   content,
 			Sender:    sender,
+			FilePath:  file_path,
 		}
 
 		chatMessages = append(chatMessages, chatMessage)
@@ -258,13 +261,14 @@ func (s *PostgresStore) GetRoomChatMessages(roomId string) ([]wsocket.ChatMessag
 	return chatMessages, err
 }
 
-func (s *PostgresStore) AddNewChatMessage(roomId string, msgID string, timestamp string, content string, sender string) error {
+func (s *PostgresStore) AddNewChatMessage(roomId string, msgID string, timestamp string, content string, sender string, file_path string) error {
 
 	query := `insert into chat_message
-	        (msg_id, room_id, time_stamp, content, sender)
-			 values ($1, $2, $3, $4, $5)
+	        (msg_id, room_id, time_stamp, content, sender, file_path)
+			 values ($1, $2, $3, $4, $5, $6)
 			 ON CONFLICT (msg_id) DO NOTHING`
 
+	fmt.Println("INSERT:" + msgID + "|" + roomId + "|" + timestamp + "|" + content + "|" + sender + "|" + file_path)
 	//msgID := uuid.New()
 	res, err := s.db.Query(
 		query,
@@ -272,7 +276,8 @@ func (s *PostgresStore) AddNewChatMessage(roomId string, msgID string, timestamp
 		roomId,
 		timestamp,
 		content,
-		sender)
+		sender,
+		file_path)
 
 	if err != nil {
 		fmt.Print(err)

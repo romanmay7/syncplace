@@ -9,6 +9,7 @@ import (
 
 	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
+	"github.com/romanmay7/syncplace/filemanager"
 	"github.com/romanmay7/syncplace/wsocket"
 	"github.com/rs/cors"
 )
@@ -44,14 +45,17 @@ func makeHTTPHandleFunc(f apiFunc) http.HandlerFunc {
 type SyncPlaceAPIServer struct {
 	listenAddr   string
 	store        Storage
+	filemgr      filemanager.FileManager
 	wsockHandler *wsocket.WsHandler
 	wsockHub     *wsocket.Hub
 }
 
-func NewAPIServer(listenAddr string, store Storage, wsHandler *wsocket.WsHandler, wsHub *wsocket.Hub) *SyncPlaceAPIServer {
+func NewAPIServer(listenAddr string, store Storage, filemanager filemanager.FileManager,
+	wsHandler *wsocket.WsHandler, wsHub *wsocket.Hub) *SyncPlaceAPIServer {
 	return &SyncPlaceAPIServer{
 		listenAddr:   listenAddr,
 		store:        store,
+		filemgr:      filemanager,
 		wsockHandler: wsHandler,
 		wsockHub:     wsHub,
 	}
@@ -60,6 +64,7 @@ func NewAPIServer(listenAddr string, store Storage, wsHandler *wsocket.WsHandler
 func (s *SyncPlaceAPIServer) Run() {
 	router := mux.NewRouter()
 
+	router.HandleFunc("/api/upload", s.filemgr.UploadFile)
 	router.HandleFunc("/api/login", makeHTTPHandleFunc(s.handleLogin))
 	router.HandleFunc("/api/user", makeHTTPHandleFunc(s.handleUserAccount))
 	router.HandleFunc("/api/user/{id}", withJWTAuth(makeHTTPHandleFunc(s.handleGetUserAccountByID), s.store))
@@ -399,7 +404,7 @@ func checkIfBoardRecordExistAndSave(handlerFunc http.HandlerFunc, s Storage, hub
 		if len(hub.Rooms[roomID].ChatMessages) != 0 {
 			for _, msg := range hub.Rooms[roomID].ChatMessages {
 
-				err := s.AddNewChatMessage(msg.RoomID, msg.MsgID, msg.Timestamp, msg.Content, msg.Sender)
+				err := s.AddNewChatMessage(msg.RoomID, msg.MsgID, msg.Timestamp, msg.Content, msg.Sender, msg.FilePath)
 				if err != nil {
 					WriteJSON(w, http.StatusForbidden, ApiError{Error: "DB Error: Storing New Chat Message "})
 					fmt.Print(err)

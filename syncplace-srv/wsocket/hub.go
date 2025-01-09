@@ -16,6 +16,7 @@ type ChatMessage struct {
 	Timestamp string `json:"timestamp"`
 	Content   string `json:"content"`
 	Sender    string `json:"sender"`
+	FilePath  string `json:"filePath"`
 }
 
 type Room struct {
