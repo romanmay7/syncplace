@@ -5,6 +5,7 @@ import { emitNewChatMessage } from "../wsocket/wsocketConn";
 import { AuthContext } from '../Auth/AuthContext'; // Import AuthContext
 import {v4 as uuid} from "uuid";
 import { host } from "../utils/APIRoutes";
+import './ChatComponent.css'
 
 
 function ChatMessage(msgId, roomId, timestamp, content, sender, filePath) {
@@ -79,7 +80,7 @@ const handleFileChange = (event) => {
 //--------------------------------------------------------------------------
 
    return (
-    <div className="position-fixed top-0 h-100 text-white bg-dark" style={{ width: "350px", left: "%0 " }}>
+    <div className="position-fixed top-0 h-100 text-dark bg-dark" style={{ width: "450px", left: "%0 " }}>
       <button type="button" onClick={() => setOpenedChatWindow(false)} className="btn btn-light btn-block w-50 mt-5">
         Close
       </button>
@@ -89,10 +90,12 @@ const handleFileChange = (event) => {
             <div key={msg.id} className="message">
               <span className="sender">{msg.sender}: </span>
               <span className="content">
-              {msg.content}
-              {msg.filePath && <a href={`${host}/uploads/${msg.filePath}`}>Download</a>} 
+              <p>
+                {msg.content}
+                {msg.filePath && <a href={`${host}/uploads/${msg.filePath}`}>Download</a>}
+              </p>
               </span>
-              <span className="timestamp">{new Date(msg.timestamp).toLocaleString()}</span>
+              <span className="time-right">{new Date(msg.timestamp).toLocaleString()}</span>
             </div>
           ))}
         </div>
@@ -107,10 +110,12 @@ const handleFileChange = (event) => {
         />
         <div className="d-flex justify-content-between"> 
           <input type="file" id="fileInput" accept="*" onChange={handleFileChange} style={{ display: 'none' }} />
-          <button type="button" className="btn btn-primary rounded-0" onClick={() => document.getElementById('fileInput').click()}>
+          <button type="button" className="btn btn-info rounded-0"
+           onClick={() => document.getElementById('fileInput').click()}
+           style= {{ marginLeft: '15px' }}>
             Attach File
           </button>
-          <button type="submit" className="btn btn-primary rounded-0">
+          <button type="submit" className="btn btn-primary rounded-0" style= {{ marginRight: '15px' }} >
             Send Message
           </button>
         </div>

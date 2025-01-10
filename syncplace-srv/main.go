@@ -27,5 +27,5 @@ func main() {
 	//SERVER
 	server := NewAPIServer(":3100", store, filemng, wsHandler, hub)
 	server.Run()
-	fmt.Println("Yeah!")
+	fmt.Println("SyncPlace app Backend Server is Running!")
 }
