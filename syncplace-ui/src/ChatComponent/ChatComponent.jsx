@@ -84,10 +84,10 @@ const handleFileChange = (event) => {
       <button type="button" onClick={() => setOpenedChatWindow(false)} className="btn btn-light btn-block w-50 mt-5">
         Close
       </button>
-      <div className="w-100 mt-5 p-2 border border-1 border-white rounded-3" style={{ height: "70%" }}>
+      <div className="w-100 mt-5 p-2 border border-1 border-white rounded-3" style={{ height: "70%", overflowY:"auto"}}>
         <div className="chat-messages">
           {messages.map((msg) => (
-            <div key={msg.id} className="message">
+            <div key={msg.id}  className={msg.sender === userName ? "message" : "other_message"}>
               <span className="sender">{msg.sender}: </span>
               <span className="content">
               <p>
