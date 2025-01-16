@@ -74,6 +74,7 @@ func (s *SyncPlaceAPIServer) Run() {
 	router.HandleFunc("/api/user/{id}", withJWTAuth(makeHTTPHandleFunc(s.handleGetUserAccountByID), s.store))
 
 	router.HandleFunc("/api/saveBoard/{roomId}", checkIfBoardRecordExistAndSave(makeHTTPHandleFunc(s.handleSaveBoardState), s.store, s.wsockHub))
+	router.HandleFunc("/api/clearBoard/{roomId}/{userName}", clearBoardState(makeHTTPHandleFunc(s.handleClearBoardState), s.wsockHub))
 
 	router.HandleFunc("/ws/createRoom", s.wsockHandler.CreateRoom)
 	router.HandleFunc("/ws/joinRoom/{roomId}", checkBoardData(s.wsockHandler.JoinRoom, s.store, s.wsockHub))
@@ -418,5 +419,46 @@ func checkIfBoardRecordExistAndSave(handlerFunc http.HandlerFunc, s Storage, hub
 		}
 
 		handlerFunc(w, r)
+	}
+}
+
+// ----------------------------------------------------------------------------------------
+
+// GET /clearBoard
+func (s *SyncPlaceAPIServer) handleClearBoardState(w http.ResponseWriter, r *http.Request) error {
+	if r.Method != "GET" {
+		return fmt.Errorf("method not allowed %s", r.Method)
+	}
+
+	return WriteJSON(w, http.StatusOK, "Board State has been cleared")
+}
+
+// -  -  - -  -  -  -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  - -  -  -
+
+func clearBoardState(handlerFunc http.HandlerFunc, hub *wsocket.Hub) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("Calling clearBoardState MiddleWare")
+
+		vars := mux.Vars(r)
+		roomID := vars["roomId"]
+		username := vars["userName"]
+
+		//Clear all board data for this Room
+		hub.Rooms[roomID].Elements = []interface{}{}
+
+		m := &wsocket.Message{
+			Kind:         wsocket.KindBoardStateUpdate,
+			Content:      "Update The Board State",
+			Elements:     hub.Rooms[roomID].Elements,
+			ChatMessages: hub.Rooms[roomID].ChatMessages,
+			RoomID:       roomID,
+			Username:     username,
+		}
+
+		//update all connected Clients with new(cleared) board state
+		hub.Broadcast <- m
+
+		handlerFunc(w, r)
+
 	}
 }

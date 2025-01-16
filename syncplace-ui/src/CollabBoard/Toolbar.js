@@ -2,26 +2,53 @@ import React, {useContext} from "react";
 import rectangleToolIcon from '../resources/icons/rectangle_tool.svg';
 import circleToolIcon from '../resources/icons/circle-svgrepo-com.svg';
 import lineToolIcon from '../resources/icons/line-straight-svgrepo-com.svg';
+import clearBoardIcon from '../resources/icons/Clear-Icon.png';
 import saveIcon from '../resources/icons/save_512.png'
 import { toolTypes } from "../definitions";
 import { useDispatch, useSelector } from "react-redux";
-import { setToolType } from "./collabBoardSlice";
+import { setToolType, setAllBoardElementsInStore } from "./collabBoardSlice";
 import { host } from "../utils/APIRoutes";
 import { AuthContext } from '../Auth/AuthContext'; // Import AuthContext
 
 
-const IconButton = ({src, type}) => {
+
+const IconButton = ({src, type, isClearButton}) => {
  
     const dispatch = useDispatch();
 
     const selectedToolType = useSelector((state) => state.collabBoard.tool);
 
+    const { currentRoom,userName } = useContext(AuthContext);
+
     const handleToolChange = () => {
        dispatch(setToolType(type));
     };
 
+    const handleClearBoard = async() => {
+      //Clear elements in Store
+      dispatch(setAllBoardElementsInStore([]));
+      
+      //Clear Board State on Backend 
+      try{
+        const res = await fetch(`${host}/api/clearBoard/${currentRoom}/${userName}`, {
+         method: "GET",
+         headers: { "Content-Type": "application/json",},
+         })
+  
+        if(res.ok) {
+         console.log("The Room Board state was Cleared");
+         return true
+         }
+       }
+       catch (err) {
+          console.log(err)
+          return false
+         }
+    };
+    
+
     return  (
-    <button onClick={handleToolChange} className={
+    <button onClick={isClearButton ? handleClearBoard: handleToolChange} className={
         selectedToolType === type ? "toolbar_button_active" : "toolbar_button"
         }
     >
@@ -68,7 +95,8 @@ const Toolbar = () => {
                 <div className="toolbar_container">
                    <IconButton src={lineToolIcon} type ={toolTypes.LINE} /> 
                    <IconButton src={rectangleToolIcon} type ={toolTypes.RECTANGLE} /> 
-                   <IconButton src={circleToolIcon} type ={toolTypes.CIRCLE} /> 
+                   <IconButton src={circleToolIcon} type ={toolTypes.CIRCLE} />
+                   <IconButton src={clearBoardIcon} isClearButton />
                    <SaveButton src={saveIcon} /> 
                 </div>
               );
