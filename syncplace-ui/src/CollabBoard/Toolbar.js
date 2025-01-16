@@ -6,7 +6,7 @@ import clearBoardIcon from '../resources/icons/Clear-Icon.png';
 import saveIcon from '../resources/icons/save_512.png'
 import { toolTypes } from "../definitions";
 import { useDispatch, useSelector } from "react-redux";
-import { setToolType, setColour, setAllBoardElementsInStore } from "./collabBoardSlice";
+import { setToolType, setColour, setFillModeInStore,setAllBoardElementsInStore } from "./collabBoardSlice";
 import { host } from "../utils/APIRoutes";
 import { AuthContext } from '../Auth/AuthContext'; // Import AuthContext
 
@@ -94,7 +94,15 @@ const Toolbar = () => {
 
         const dispatch = useDispatch();
         const [color, setColor] = useState('#000000'); 
-        
+        const [fillMode, setFillMode] = useState(true); // Add state to manage fill mode
+
+        const handleFillModeChange = () => {
+          setFillMode(!fillMode);
+          console.log("Fill mode:", fillMode);
+          // Dispatch toggleFillMode event here
+          dispatch(setFillModeInStore(fillMode));
+        };
+
         const handleColorChange = (event) => {
           console.log("COLOUR:" + event.target.value);
           setColor(event.target.value); // Update color state first
@@ -112,7 +120,9 @@ const Toolbar = () => {
                    <IconButton src={rectangleToolIcon} type ={toolTypes.RECTANGLE} /> 
                    <IconButton src={circleToolIcon} type ={toolTypes.CIRCLE} />
                    <IconButton src={clearBoardIcon} isClearButton />
-                   <SaveButton src={saveIcon} /> 
+                   <SaveButton src={saveIcon} />
+                   <input type="checkbox" checked={!fillMode} onChange={handleFillModeChange} />
+                   <label>Fill Mode</label> 
                 </div>
               );
    };

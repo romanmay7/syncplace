@@ -4,6 +4,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   tool:null,
   colour:'#000000',
+  fillMode: false,
   elements: [],
   chatMessages: [],
 };
@@ -19,6 +20,9 @@ export const collabBoardSlice = createSlice({
       setColour: (state, action) => {
         state.colour = action.payload;
       },
+      setFillModeInStore: (state, action) => {
+        state.fillMode = action.payload;
+      },  
       updateBoardElementInStore: (state, action) => {
         console.log("updateBoardElementInStore");
         const {id} = action.payload;
@@ -53,6 +57,6 @@ export const collabBoardSlice = createSlice({
     },
   });
   
-export const  { setToolType, setColour, updateBoardElementInStore, setAllBoardElementsInStore, setChatMessageInStore, setAllChatMessagesInStore } = collabBoardSlice.actions;
+export const  { setToolType, setColour, setFillModeInStore, updateBoardElementInStore, setAllBoardElementsInStore, setChatMessageInStore, setAllChatMessagesInStore } = collabBoardSlice.actions;
   
  // export default collabBoardSlice;  

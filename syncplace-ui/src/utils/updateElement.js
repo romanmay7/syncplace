@@ -5,8 +5,8 @@ import { setAllBoardElementsInStore } from "../CollabBoard/collabBoardSlice";
 import { emitBoardElementUpdate } from "../wsocket/wsocketConn";
 
 
-export const updateBoardElement = ({id, x1, x2, y1, y2, type,colour,index }, elements, currentRoom) => {
-    //create copy f elements array
+export const updateBoardElement = ({id, x1, x2, y1, y2, type,colour,fillMode,index }, elements, currentRoom) => {
+    //create copy of elements array
     const elementsCopy = [...elements]
 
     switch(type) {
@@ -20,6 +20,7 @@ export const updateBoardElement = ({id, x1, x2, y1, y2, type,colour,index }, ele
                 x2,
                 y2,
                 colour:colour,
+                fillMode:fillMode,
                 toolType: type,
             });
         
@@ -30,7 +31,6 @@ export const updateBoardElement = ({id, x1, x2, y1, y2, type,colour,index }, ele
         store.dispatch(setAllBoardElementsInStore(elementsCopy));
         
         //Update all the Clients ,connected to the same Web Socket
-        //const roomId = localStorage.getItem('current-room-id');  //Get roomID from localStore
 
         emitBoardElementUpdate(currentRoom,updatedElement);
         

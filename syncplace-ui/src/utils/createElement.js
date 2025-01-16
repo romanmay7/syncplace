@@ -3,17 +3,23 @@ import { toolTypes } from '../definitions';
 
 const generator = rough.generator();
 
-const generateRectangle = ({x1, y1, x2, y2, colour}) => {
-    return generator.rectangle(x1, y1, x2 - x1, y2 - y1, {stroke: colour});
+const generateRectangle = ({x1, y1, x2, y2, colour, fillMode}) => {
+    if(!fillMode)
+      return generator.rectangle(x1, y1, x2 - x1, y2 - y1, {stroke: colour});
+    else
+      return generator.rectangle(x1, y1, x2 - x1, y2 - y1, {fill: colour});
 
 };
 
-const generateCircle = ({x1, y1, x2, y2, colour}) => {
+const generateCircle = ({x1, y1, x2, y2, colour, fillMode}) => {
     //console.log("x1:", x1, "y1:", y1); console.log("x2:", x2, "y2:", y2); 
     //var radius = 10 * Math.sqrt((x2 - x1)^2 + (y2 - y1)^2);
     var radius = ((x2 - x1) + (y2 - y1));
     //console.log("Radius:", radius);
-    return generator.circle(x1, y1, radius, {stroke: colour});
+    if(!fillMode)
+      return generator.circle(x1, y1, radius, {stroke: colour});
+    else
+      return generator.circle(x1, y1, radius, {fill: colour});
   };
 
 const generateLine = ({x1, y1, x2, y2, colour}) => {
@@ -21,12 +27,12 @@ const generateLine = ({x1, y1, x2, y2, colour}) => {
 
 };
 
-export const  createBoardElement = ({ x1, y1, x2, y2, toolType, colour, id}) => {
+export const  createBoardElement = ({ x1, y1, x2, y2, toolType, colour, fillMode, id}) => {
     let roughElement;
 
     switch (toolType) {
         case toolTypes.RECTANGLE:
-            roughElement = generateRectangle({x1, y1, x2, y2, colour});
+            roughElement = generateRectangle({x1, y1, x2, y2, colour, fillMode});
             return {
                 id: id,
                 roughElement,
@@ -39,7 +45,7 @@ export const  createBoardElement = ({ x1, y1, x2, y2, toolType, colour, id}) => 
 
             };
         case toolTypes.CIRCLE:
-            roughElement = generateCircle({x1, y1, x2, y2, colour});
+            roughElement = generateCircle({x1, y1, x2, y2, colour, fillMode});
             return {
                 id: id,
                 roughElement,
