@@ -122,10 +122,6 @@ func (h *WsHandler) JoinRoom(w http.ResponseWriter, r *http.Request) {
 		Username:     username,
 	}
 
-	//fmt.Println("Elements in Storage")
-
-	//fmt.Println(h.hub.Rooms[roomID].Elements)
-
 	//Register a new Client through the Register channel
 	h.hub.Register <- cl
 	//Broadcast that Message (that new User has joined the Room) to all Users

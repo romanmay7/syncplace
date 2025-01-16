@@ -10,7 +10,9 @@ export const updateBoardElement = ({id, x1, x2, y1, y2, type, index }, elements,
     const elementsCopy = [...elements]
 
     switch(type) {
-        case toolTypes.RECTANGLE:
+        case toolTypes.LINE :
+        case toolTypes.CIRCLE :
+        case toolTypes.RECTANGLE :
             const updatedElement = createBoardElement({
                 id,
                 x1,
@@ -30,8 +32,9 @@ export const updateBoardElement = ({id, x1, x2, y1, y2, type, index }, elements,
         //const roomId = localStorage.getItem('current-room-id');  //Get roomID from localStore
 
         emitBoardElementUpdate(currentRoom,updatedElement);
+        
 
-        break;
+       break;
         default:
             throw new Error('An Error occuried during elements update...')
     }

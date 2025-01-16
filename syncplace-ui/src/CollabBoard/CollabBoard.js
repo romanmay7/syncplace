@@ -61,7 +61,7 @@ const CollabBoard = () => {
          
          console.log(toolType);
 
-         if(toolType === toolTypes.RECTANGLE){
+         if(toolType === toolTypes.RECTANGLE || toolType === toolTypes.CIRCLE || toolType === toolTypes.LINE ){
            setAction(actions.DRAWING);
         }
 

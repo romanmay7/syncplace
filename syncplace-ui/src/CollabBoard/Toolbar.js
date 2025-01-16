@@ -1,5 +1,7 @@
 import React, {useContext} from "react";
 import rectangleToolIcon from '../resources/icons/rectangle_tool.svg';
+import circleToolIcon from '../resources/icons/circle-svgrepo-com.svg';
+import lineToolIcon from '../resources/icons/line-straight-svgrepo-com.svg';
 import saveIcon from '../resources/icons/save_512.png'
 import { toolTypes } from "../definitions";
 import { useDispatch, useSelector } from "react-redux";
@@ -64,7 +66,9 @@ const SaveButton =  ({src}) => {
 const Toolbar = () => {
         return (
                 <div className="toolbar_container">
+                   <IconButton src={lineToolIcon} type ={toolTypes.LINE} /> 
                    <IconButton src={rectangleToolIcon} type ={toolTypes.RECTANGLE} /> 
+                   <IconButton src={circleToolIcon} type ={toolTypes.CIRCLE} /> 
                    <SaveButton src={saveIcon} /> 
                 </div>
               );
