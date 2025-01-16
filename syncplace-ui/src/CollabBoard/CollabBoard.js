@@ -25,6 +25,7 @@ const CollabBoard = () => {
 
     //Getting objects from Store's State
     const toolType = useSelector(state =>state.collabBoard.tool);
+    const colour = useSelector(state =>state.collabBoard.colour);
     const elements = useSelector(state =>state.collabBoard.elements);
 
     const [action, setAction] = useState(null);
@@ -73,6 +74,7 @@ const CollabBoard = () => {
             x2:clientX,
             y2:clientY,
             toolType,
+            colour,
             id: uuid(),
          });
 
@@ -103,6 +105,7 @@ const CollabBoard = () => {
                     x2: clientX, //NEW x
                     y2: clientY, //NEW y
                     type: elements[index].type,
+                    colour: colour
                 }, 
                 elements,
                 currentRoom

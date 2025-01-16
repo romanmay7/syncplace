@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, {useContext, useState } from "react";
 import rectangleToolIcon from '../resources/icons/rectangle_tool.svg';
 import circleToolIcon from '../resources/icons/circle-svgrepo-com.svg';
 import lineToolIcon from '../resources/icons/line-straight-svgrepo-com.svg';
@@ -6,7 +6,7 @@ import clearBoardIcon from '../resources/icons/Clear-Icon.png';
 import saveIcon from '../resources/icons/save_512.png'
 import { toolTypes } from "../definitions";
 import { useDispatch, useSelector } from "react-redux";
-import { setToolType, setAllBoardElementsInStore } from "./collabBoardSlice";
+import { setToolType, setColour, setAllBoardElementsInStore } from "./collabBoardSlice";
 import { host } from "../utils/APIRoutes";
 import { AuthContext } from '../Auth/AuthContext'; // Import AuthContext
 
@@ -91,8 +91,23 @@ const SaveButton =  ({src}) => {
 
 
 const Toolbar = () => {
+
+        const dispatch = useDispatch();
+        const [color, setColor] = useState('#000000'); 
+        
+        const handleColorChange = (event) => {
+          console.log("COLOUR:" + event.target.value);
+          setColor(event.target.value); // Update color state first
+          dispatch(setColour(event.target.value)); // Then dispatch action to update store 
+        };
+
         return (
                 <div className="toolbar_container">
+                    <input 
+                     type="color" 
+                     value={color} 
+                     onChange={handleColorChange} 
+                    />
                    <IconButton src={lineToolIcon} type ={toolTypes.LINE} /> 
                    <IconButton src={rectangleToolIcon} type ={toolTypes.RECTANGLE} /> 
                    <IconButton src={circleToolIcon} type ={toolTypes.CIRCLE} />

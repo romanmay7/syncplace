@@ -5,7 +5,7 @@ import { setAllBoardElementsInStore } from "../CollabBoard/collabBoardSlice";
 import { emitBoardElementUpdate } from "../wsocket/wsocketConn";
 
 
-export const updateBoardElement = ({id, x1, x2, y1, y2, type, index }, elements, currentRoom) => {
+export const updateBoardElement = ({id, x1, x2, y1, y2, type,colour,index }, elements, currentRoom) => {
     //create copy f elements array
     const elementsCopy = [...elements]
 
@@ -19,6 +19,7 @@ export const updateBoardElement = ({id, x1, x2, y1, y2, type, index }, elements,
                 y1,
                 x2,
                 y2,
+                colour:colour,
                 toolType: type,
             });
         
