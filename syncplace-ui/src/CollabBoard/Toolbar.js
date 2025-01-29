@@ -99,7 +99,7 @@ const Toolbar = () => {
         const handleFillModeChange = () => {
           setFillMode(!fillMode);
           console.log("Fill mode:", fillMode);
-          // Dispatch toggleFillMode event here
+          // Dispatch setFillModeInStore event here
           dispatch(setFillModeInStore(fillMode));
         };
 
