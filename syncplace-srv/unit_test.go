@@ -248,7 +248,7 @@ func TestJoinRoom(t *testing.T) {
 	router.HandleFunc("/ws/joinRoom/{roomId}", s.wsockHandler.JoinRoom)
 
 	// Test case 1: Valid roomId
-	req1, _ := http.NewRequest("GET", "/ws/joinRoom/123", nil) //  roomId
+	req1, _ := http.NewRequest("GET", "/ws/joinRoom/123321342142412421", nil) //  roomId
 	rr1 := httptest.NewRecorder()
 	router.ServeHTTP(rr1, req1)
 
@@ -266,7 +266,7 @@ func TestGetClients(t *testing.T) {
 	router := mux.NewRouter()
 	router.HandleFunc("/ws/getClients/{roomId}", s.wsockHandler.GetClients)
 
-	req, _ := http.NewRequest("GET", "/ws/getClients/123", nil)
+	req, _ := http.NewRequest("GET", "/ws/getClients/123321342142412421", nil)
 	rr := httptest.NewRecorder()
 
 	router.ServeHTTP(rr, req)
