@@ -5,7 +5,7 @@ In order to run everything in your local environment (You should have Docker + D
 
 Run this command to create SyncPlace SERVER, UI, and DB instances that the application needs.
 
-"docker-compose up -d"
+"docker-compose up -d"  
 After some time,you should get :
 
 [+] Running 3/3  
