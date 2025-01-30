@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  syncplace-srv:
+    build: ./syncplace-srv
+    ports:
+      - "3100:3100"
+    depends_on:
+      - postgres
+    environment:
+        DATABASE_URL: postgres://postgres:syncplace@postgres:5432/postgres?sslmode=disable
+    volumes:
+      - ./syncplace-srv/wait-for-it.sh:/syncplace/wait-for-it.sh 
+    working_dir: /syncplace  
+    command: ["./wait-for-it.sh", "-t", "30", "postgres:5432", "--", "./syncplace-srv"]
+  syncplace-ui:
+    build: ./syncplace-ui
+    ports:
+      - "3000:3000"
+    depends_on:
+      - syncplace-srv
+    environment:
+      - REACT_APP_API_URL=http://syncplace-srv:3100  # Important: Point to the backend service name and port
+
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432" # Only expose if you need to access from outside Docker. For backend access, use internal network.
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=syncplace
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data
+
+volumes:
+  postgres_data: # Named volume for Postgres data persistence
