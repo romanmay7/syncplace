@@ -1,5 +1,6 @@
 import { toolTypes } from "../definitions"
 
+//Utility function for drawing "rough.js" type elements on Canvas
 
 export const drawBoardElement = ({roughCanvas, context, element}) => {
 

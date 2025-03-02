@@ -1,10 +1,10 @@
 import { toolTypes } from "../definitions";
-import { createBoardElement } from "./createElement";
+import { createBoardElement } from "./createBoardElement";
 import { store } from "../store/store";
 import { setAllBoardElementsInStore } from "../CollabBoard/collabBoardSlice";
 import { emitBoardElementUpdate } from "../wsocket/wsocketConn";
 
-
+//Utility function that updates the specific element on our Board
 export const updateBoardElement = ({id, x1, x2, y1, y2, type,colour,fillMode,index }, elements, currentRoom) => {
     //create copy of elements array
     const elementsCopy = [...elements]
@@ -30,7 +30,7 @@ export const updateBoardElement = ({id, x1, x2, y1, y2, type,colour,fillMode,ind
         //Update  all the elements in our Store
         store.dispatch(setAllBoardElementsInStore(elementsCopy));
         
-        //Update all the Clients ,connected to the same Web Socket
+        //Update all the Clients ,connected to the same Web Socket, by sending them the updated element
 
         emitBoardElementUpdate(currentRoom,updatedElement);
         

@@ -86,7 +86,7 @@ const CreateRoom = () => {
           type="submit"
           onClick={handleCreateRoom}
           
-          className="mt-4 btn-primary btn-block form-control"
+          className="bigbutton"
         >
           Create New Room
         </button>

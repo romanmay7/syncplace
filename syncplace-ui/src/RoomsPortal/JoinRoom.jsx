@@ -63,7 +63,7 @@ const JoinRoom = ({ uuid }) => {
       <button
         type="submit"
         onClick={handleJoinRoom}
-        className="mt-4 btn-primary btn-block form-control"
+        className="bigbutton"
       >
         Join Room
       </button>

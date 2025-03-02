@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AuthContext } from '../Auth/AuthContext'; // Import AuthContext
 
 
-
+//********************************************************************************************************************** */
 
 const ToggleChatButton =  ({src, setOpenedChatWindow }) => {
 
@@ -21,7 +21,7 @@ const ToggleChatButton =  ({src, setOpenedChatWindow }) => {
    );
 };
 
-
+//********************************************************************************************************************** */
 const FeaturesPanel = ({ setOpenedChatWindow }) => {
         return (
                 <div className="features_panel">

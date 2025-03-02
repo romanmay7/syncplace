@@ -1,6 +1,7 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 
+//Define Collaboration Board State that is managed by Redux Store
 const initialState = {
   tool:null,
   colour:'#000000',
@@ -9,7 +10,9 @@ const initialState = {
   chatMessages: [],
 };
 
-
+//********************************************************************************************************************** */
+//Define functionality of Redux Store Management for Collaboration Board Component
+//These functions can be called by using "dispatch" function that is part of reduxjs library
 export const collabBoardSlice = createSlice({
     name:'collabBoard',
     initialState,

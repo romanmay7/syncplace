@@ -13,11 +13,14 @@ import { ChatComponent } from '../ChatComponent/ChatComponent';
 let selectedBoardElement;
 
 
-
+//Used during element update ,when we are moving the mouse, resizing our element ("handleMouseMove" function)
 const setSelectedBoardElement = (el) => {
     selectedBoardElement = el;
 };
 
+//********************************************************************************************************************** */
+
+//Define Collaboration Board Component
 const CollabBoard = () => {
     const canvasRef = useRef();
   
@@ -34,6 +37,7 @@ const CollabBoard = () => {
     const dispatch = useDispatch(); 
     //---------------------------------------------------------------------------------
     //The RENDERING Part of Collaboration Board Canvas goes here
+    //useLayoutEffect is a version of useEffect that fires before the browser repaints the screen.
     useLayoutEffect(() => {
         //GET CANVAS
         const canvas = canvasRef.current;
@@ -68,7 +72,9 @@ const CollabBoard = () => {
         }
 
          console.log(clientX, clientY);
-
+         
+         //Create new element by providing mouse coordinates on Canvas , selected tool type, colour and fillMode parameters,
+         //assignng it new ID by using "uuid()" function
          const element = createBoardElement({
             x1:clientX,
             y1:clientY,
@@ -79,8 +85,10 @@ const CollabBoard = () => {
             fillMode,
             id: uuid(),
          });
-
+         
+         //reference the newly created element as the "selectedBoardElement"
          setSelectedBoardElement(element);
+         //Update our Redux Store with newly created element
          dispatch(updateBoardElementInStore(element));
          console.log(element);
     };
@@ -95,7 +103,7 @@ const CollabBoard = () => {
         const {clientX, clientY} = event;
 
         if (action === actions.DRAWING) {
-            //Find index of the Selected Board Element in array
+            //Find index of the Selected Board Element in "elements" array
             const index = elements.findIndex((el) =>el.id == selectedBoardElement.id)
             //If Found
             if(index !== -1) {

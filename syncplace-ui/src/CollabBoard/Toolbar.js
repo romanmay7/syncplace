@@ -11,7 +11,7 @@ import { host } from "../utils/APIRoutes";
 import { AuthContext } from '../Auth/AuthContext'; // Import AuthContext
 
 
-
+//********************************************************************************************************************** */
 const IconButton = ({src, type, isClearButton}) => {
  
     const dispatch = useDispatch();
@@ -56,7 +56,7 @@ const IconButton = ({src, type, isClearButton}) => {
     </button>
     );
 };
-
+//********************************************************************************************************************** */
 const SaveButton =  ({src}) => {
 
    const { currentRoom } = useContext(AuthContext);
@@ -89,11 +89,11 @@ const SaveButton =  ({src}) => {
    );
 };
 
-
+//********************************************************************************************************************** */
 const Toolbar = () => {
 
         const dispatch = useDispatch();
-        const [color, setColor] = useState('#000000'); 
+        const [color, setColor] = useState('#000000'); // Add state for tool's color
         const [fillMode, setFillMode] = useState(true); // Add state to manage fill mode
 
         const handleFillModeChange = () => {

@@ -1,3 +1,3 @@
-export {createBoardElement} from  './createElement'
-export {updateBoardElement} from  './updateElement'
-export {drawBoardElement} from  './drawElement'
+export {createBoardElement} from  './createBoardElement'
+export {updateBoardElement} from  './updateBoardElement'
+export {drawBoardElement} from  './drawBoardElement'
