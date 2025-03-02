@@ -91,7 +91,7 @@ function Login() {
               name="password"
               onChange={(e) => handleChange(e)}
             />
-            <button type="submit">Login to your Account</button>
+            <button type="submit">Login</button>
             <span >
                 Don't have an Account yet ? <Link to = "/signup">Register</Link>
             </span>
@@ -103,15 +103,18 @@ function Login() {
 }
 
 const FormContainer = styled.div`
- height:80vh;
- width: 170vh;
- display: flex;
- flex-direction: column;
- justify-content: center;
- gap: 1rem;
- align-items: center;
- background-color: 131324;
- .brand {
+  height: 80vh;
+  width: 90%; /* Changed to percentage for responsiveness */
+  max-width: 170vh; /* Added max-width to limit size on larger screens */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.3rem;
+  align-items: center;
+  background-color: 131324;
+  margin: 0 auto; /* Center the container horizontally */
+
+  .brand {
     display: flex;
     align-items: center;
     gap: 1rem;
@@ -119,48 +122,50 @@ const FormContainer = styled.div`
     img {
       height: 5rem;
     }
-      h1 {
-        color: white;
-        text-transform: uppercase;
-      }
- }
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  background-color: #ece6d8;
-  border-radius: 2rem;
-  padding: 3rem 5rem;
-  input {
-    background-color: #ffffff;
-    padding: 1.2 rem;
-    border:0.1rem solid #000000.;
-    border-radius: 0%.4rem;
-    color: black;
-    width: 100%;
-    font-size:1rem;
-    &:focus {
-       border: #00000076.1rem solid #997af0;
-       outline: none;
+    h1 {
+      color: white;
+      text-transform: uppercase;
     }
   }
-  button {
-    background-color: #e6d3b1;
-    color: black;
-    padding 1rem 2rem;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 0%.4rem;
-    font-size: 1.1rem;
-    text-transform: uppercase;
-    transition: 0.5s ease-in-out;
-    &:hover {
-      background-color:#c4ad84
-    }
-  }      
-}
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    background-color: #ece6d8;
+    border-radius: 2rem;
+    padding: 3rem 5rem;
+    width: 100%; /* Make form width responsive */
+    max-width: 400px; /* Limit form width */
 
+    input {
+      background-color: #ffffff;
+      padding: 0.5rem;
+      border: 0.1rem solid #000000;
+      border-radius: 0.4rem;
+      color: black;
+      width: 100%;
+      font-size: 1rem;
+      &:focus {
+        border: #00000076 0.1rem solid #997af0;
+        outline: none;
+      }
+    }
+    button {
+      background-color: #e6d3b1;
+      color: black;
+      padding: 0.7rem 1.5rem; 
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 0.4rem;
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      transition: 0.5s ease-in-out;
+      &:hover {
+        background-color: #c4ad84;
+      }
+    }
+  }
 `;
 
 

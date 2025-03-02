@@ -120,8 +120,9 @@ function Register() {
 }
 
 const FormContainer = styled.div`
- height:80vh;
- width: 170vh;
+height: 80vh;
+ width: 90%; /* Changed to percentage for responsiveness */
+ max-width: 170vh; /* Added max-width to limit size on larger screens */
  display: flex;
  flex-direction: column;
  justify-content: center;
