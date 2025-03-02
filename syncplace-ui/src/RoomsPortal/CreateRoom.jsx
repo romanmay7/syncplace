@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState,useContext,useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {CreateNewRoom} from "../wsocket/wsocketConn";
 import {connectToWSocketServer} from "../wsocket/wsocketConn";
@@ -13,6 +13,7 @@ const CreateRoom = () => {
   const [roomId, setRoomId] = useState(uuid());
   const [name, setRoomName] = useState("");
   const { joinRoom,userName } = useContext(AuthContext); 
+  const inputRef = useRef(null);
 
   const navigate = useNavigate();
 
@@ -41,6 +42,17 @@ const CreateRoom = () => {
 
   };
 
+
+  const handleCopyClick = async () => {
+    try {
+      if (inputRef.current) {
+        await navigator.clipboard.writeText(inputRef.current.value); 
+      }
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
+  };
+
   return (
     <div className="room-form-container"> {/* Container with styles */}
       <form className="form col-md-12 mt-5">
@@ -64,6 +76,7 @@ const CreateRoom = () => {
               className="form-control my-2 border-0"
               disabled
               placeholder="Room Code"
+              ref={inputRef}
             />
             <div className="input-group-append">
               <button
@@ -76,6 +89,7 @@ const CreateRoom = () => {
               <button
                 className="btn btn-outline-danger btn-sm me-2"
                 type="button"
+                onClick={handleCopyClick}
               >
                 Copy
               </button>
