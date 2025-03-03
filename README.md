@@ -1,4 +1,5 @@
-![# SYNCPLACE](images/SPLogo.png)
+# SYNCPLACE
+<img src="images/SPLogo.png" width="200">
 
 "SyncPlace" is a collaborative web application designed to facilitate real-time interaction through a combination of whiteboard and chat functionalities. Targeting a diverse user base, spanning education, business, and beyond, the application was structured to provide a robust and intuitive platform for synchronous collaboration by using technologies such as Go, React, PostgreSQL, and web sockets.
 
