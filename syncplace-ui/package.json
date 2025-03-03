@@ -16,6 +16,7 @@
     "react-router-dom": "^7.0.2",
     "react-scripts": "5.0.1",
     "react-toastify": "^10.0.6",
+    "redux-persist-transform-filter": "^0.0.22",
     "roughjs": "^4.6.6",
     "styled-components": "^6.1.13",
     "uuid": "^10.0.0",

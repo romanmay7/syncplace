@@ -1,5 +1,6 @@
-# SYNCPLACE
+![# SYNCPLACE](images/SPLogo.png)
 
+"SyncPlace" is a collaborative web application designed to facilitate real-time interaction through a combination of whiteboard and chat functionalities. Targeting a diverse user base, spanning education, business, and beyond, the application was structured to provide a robust and intuitive platform for synchronous collaboration by using technologies such as Go, React, PostgreSQL, and web sockets.
 
 In order to run everything in your local environment (You should have Docker + Docker Compose installed)
 
