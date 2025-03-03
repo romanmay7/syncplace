@@ -22,22 +22,37 @@ function Register() {
     if (handleValidation()) {
       console.log("Sending Request to: ",registerRoute);
       const {password, username, email} = values;
-      const {data,status} = await axios.post(registerRoute, {
-        username,
-        email,
-        password,
-      });
+     try{  
+        const {data,status} = await axios.post(registerRoute, {
+          username,
+          email,
+          password,
+        });
 
-      if(status===200 || status===201 ) {
-          //localStorage.setItem('syncplace-app-user',JSON.stringify(data.userName));
-          console.log("New user created: ",data.userName);
-          alert("New user created: ",data.userName);
-          navigate("/");
+        if(status===200 || status===201 ) {
+            //localStorage.setItem('syncplace-app-user',JSON.stringify(data.userName));
+            console.log("New user created: ",data.userName);
+            alert("New user created: ",data.userName);
+            navigate("/login");
+         }
+         else 
+         {
+             toast.error(data.error, toastOptions);
+         }  
+       } catch(error) 
+         {
+          if (error.response && error.response.data && error.response.data.error)
+             {
+              // Access the error message from the server's response
+              toast.error(error.response.data.error, toastOptions);
+             } else
+             {
+               // Handle cases where the error response is not as expected
+               toast.error("An unexpected error occurred.", toastOptions);
+               console.error("Axios error:", error); // Log the full error for debugging
+             }
+         }
       }
-      else {
-        toast.error(data.msg, toastOptions);
-      }
-    }
 
   };
 

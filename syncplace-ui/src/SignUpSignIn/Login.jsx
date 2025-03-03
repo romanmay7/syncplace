@@ -22,26 +22,39 @@ function Login() {
     if (handleValidation()) {
       console.log("Sending Request to: ",loginRoute);
       const {password, username} = values;
-      const {data,status} = await axios.post(loginRoute, {
-        username,
-        password,
-      });
+     try{
+          const {data,status} = await axios.post(loginRoute, {
+           username,
+           password,
+         });
 
-      if(status===200 || status===201 ) {
+         if(status===200 || status===201 )
+           {
+             console.log("Login is Successfull: ",data.userName,);
+             console.log("token: ",data.token,);
+             //localStorage.setItem('token', data.token);
+             //localStorage.setItem('syncplace-app-user',data.userName);
+             login(data.userName, data.token); // Call the login function from AuthContext
 
-          console.log("Login is Successfull: ",data.userName,);
-          console.log("token: ",data.token,);
-          //localStorage.setItem('token', data.token);
-          //localStorage.setItem('syncplace-app-user',data.userName);
-          login(data.userName, data.token); // Call the login function from AuthContext
-
-          navigate("/joinroom");
-      }
-      else {
-        toast.error(data.msg, toastOptions);
-      }
+             navigate("/joinroom");
+           }
+         else {
+           toast.error(data.error, toastOptions); 
+          }
+       } catch(error) 
+       {
+           if (error.response && error.response.data && error.response.data.error) 
+            {
+             // Access the error message from the server's response
+             toast.error(error.response.data.error, toastOptions);
+            } else
+            {
+             // Handle cases where the error response is not as expected
+             toast.error("An unexpected error occurred.", toastOptions);
+             console.error("Axios error:", error); // Log the full error for debugging
+            }
+        }
     }
-
   };
 
   const toastOptions = {

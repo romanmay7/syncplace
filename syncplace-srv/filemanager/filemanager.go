@@ -49,6 +49,14 @@ func (fm *LocalFileManager) UploadFile(w http.ResponseWriter, r *http.Request) {
 	filename := uuid.New().String() + filepath.Ext(filepath.Base(header.Filename))
 	filePath := filepath.Join(fm.uploadDir, filename)
 
+	// Ensure the upload directory exists
+	err = os.MkdirAll(fm.uploadDir, 0755) // Create directory if it doesn't exist
+	if err != nil {
+		http.Error(w, "Could not create upload directory", http.StatusInternalServerError)
+		fmt.Println("Error creating directory:", err)
+		return
+	}
+
 	// Create destination file
 	dst, err := os.Create(filePath)
 	if err != nil {

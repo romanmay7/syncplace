@@ -37,23 +37,37 @@ export const ChatComponent = ({setOpenedChatWindow }) => {
       // Using toISOString() for an ISO 8601 compliant format
       const formattedDate = date.toISOString();
 
-      //Upload file to Server (file must be selected)
-      let filePath = null;
-      if (file) {
+    // Upload file to Server (file must be selected)
+    let filePath = null;
+    if (file) {
         const formData = new FormData();
-        formData.append("file", file);
+        formData.append("file", file); // Ensure "file" matches your Go backend's expectation
 
-        const response = await fetch (host + '/api/upload', {
-           method: 'POST',
-           body: formData,
-        });
+        try {
+            const response = await fetch(host + '/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
 
-        if(response.ok) {
-          filePath = await response.text();
-        }else {
-          console.error("Error uploading file to Server: ",response.statusText);
-         }
-      }
+            if (response.ok) {
+                filePath = await response.text();
+                console.log("File uploaded successfully. File path:", filePath);
+                // Optionally, update state or perform other actions upon successful upload
+            } else {
+                console.error("Error uploading file to Server:", response.status, response.statusText);
+                try {
+                    const errorText = await response.text();
+                    console.error("Server Response:", errorText);
+                } catch (textError) {
+                    console.error("Could not read server response");
+                }
+            }
+        } catch (error) {
+            console.error("Network error during file upload:", error);
+        }
+    } else {
+        console.log("No file selected for upload.");
+    }
     
       const chatMessage = new ChatMessage(
              uuid(),
@@ -74,6 +88,7 @@ export const ChatComponent = ({setOpenedChatWindow }) => {
 //--------------------------------------------------------------------------
 
 const handleFileChange = (event) => {
+  console.log("Attaching File:" + event.target.files[0])
   setFile(event.target.files[0]);
 };
 
