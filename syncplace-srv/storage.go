@@ -36,9 +36,8 @@ func NewPostgresStore() (*PostgresStore, error) {
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
 		fmt.Println("DATABASE_URL environment variable not set")
+		connStr = "user=postgres dbname=postgres password=syncplace sslmode=disable"
 	}
-
-	//connStr := "user=postgres dbname=postgres password=syncplace sslmode=disable"
 
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {

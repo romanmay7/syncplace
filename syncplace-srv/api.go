@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
@@ -230,9 +231,10 @@ const JWT_SECRET = "SyncPlace999"
 
 func createJWT(account *UserAccount) (string, error) {
 	//Create Claims
+	expirationTime := time.Now().Add(5 * time.Minute) // Token expires in 5 minutes
 	claims := &jwt.MapClaims{
-		"expiresAt": 15000,
-		"username":  account.UserName,
+		"exp":      expirationTime.Unix(),
+		"username": account.UserName,
 	}
 
 	//secret := os.Getenv("JWT_SECRET")
