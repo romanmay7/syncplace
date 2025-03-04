@@ -41,7 +41,7 @@ export const ChatComponent = ({setOpenedChatWindow }) => {
     let filePath = null;
     if (file) {
         const formData = new FormData();
-        formData.append("file", file); // Ensure "file" matches your Go backend's expectation
+        formData.append("file", file); //  "file" should match our Backend File Manager expectation
 
         try {
             const response = await fetch(host + '/api/upload', {
@@ -50,7 +50,7 @@ export const ChatComponent = ({setOpenedChatWindow }) => {
             });
 
             if (response.ok) {
-                filePath = await response.text();
+                filePath = await response.text(); // Backend will return the path to the uploaded file on the Server
                 console.log("File uploaded successfully. File path:", filePath);
                 // Optionally, update state or perform other actions upon successful upload
             } else {

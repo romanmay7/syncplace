@@ -1,9 +1,10 @@
 
 import { createSlice } from '@reduxjs/toolkit';
+import { toolTypes } from "../definitions";
 
 //Define Collaboration Board State that is managed by Redux Store
 const initialState = {
-  tool:null,
+  tool: toolTypes.LINE,
   colour:'#000000',
   fillMode: false,
   elements: [],
